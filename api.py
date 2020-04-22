@@ -5,9 +5,13 @@ from getpass import getpass
 
 
 class API:
-    def __init__ (self, password):
-        self.db = pymysql.connect("localhost", "root", password, "social")
-        self.cursor = self.db.cursor()
+    def __init__ (self, password, unix_socket):
+        if unix_socket != '':
+            self.db = pymysql.connect(host="localhost", user="root", password=password, db="social", unix_socket=unix_socket)
+            self.cursor = self.db.cursor()
+        else:
+            self.db = pymysql.connect(host="localhost", user="root", password=password, db="social")
+            self.cursor = self.db.cursor()
 
     def handleInput(self):
         input = sys.argv
@@ -180,19 +184,30 @@ def main():
             f = open("password.txt", "r")
             password = f.read()
             f.close()
+            f = open("socket.txt", "r")
+            socket = f.read()
+            f.close()
         except:
+            socket = input('Enter MySQL unix_socket: ')
             password = getpass()
             f = open("password.txt", "w")
             f.write(password)
             f.close()
+            f = open("socket.txt", "w")
+            f.write(socket)
+            f.close()
         try:
-            api = API(password)
+            api = API(password, socket)
             api.handleInput()
             flag = 0
         except:
+            socket = input('Enter MySQL unix_socket: ')
             password = getpass()
             f = open("password.txt", "w")
             f.write(password)
+            f.close()
+            f = open("socket.txt", "w")
+            f.write(socket)
             f.close()
 
 main()
